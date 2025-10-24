@@ -24,8 +24,11 @@ int findPrev(position, char*);
 
 int main() {
 	person head = { .name = {0}, .surname = {0}, .birthyear=0, .next=NULL };
+	char ch=0;
+	printf("Which of the following actions do you want to execute:\na - add to the front of the list\nb - printt out the list\nc - add to the end of the list\nd - search by surname in the list\ne - delete element from the list\n}");
 
 
+	
 	removeList(&head);
 	return 1;
 }
@@ -113,4 +116,5 @@ int removeList(position head) {
 	}
 
 	return EXIT_SUCCESS;
+
 }
