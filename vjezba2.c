@@ -25,10 +25,14 @@ int findPrev(position, char*);
 int main() {
 	person head = { .name = {0}, .surname = {0}, .birthyear=0, .next=NULL };
 	char ch=0;
+
+	addToFront(&head, "Ivan", "Ivic", 2000);
+	addToFront(&head, "Ana", "Anic", 2001);
 	printf("Which of the following actions do you want to execute:\na - add to the front of the list\nb - printt out the list\nc - add to the end of the list\nd - search by surname in the list\ne - delete element from the list\n}");
 
 
-	
+
+	//8ipo navecer subota ako ovo citate mislin se zadnje 3 ure kako ovaj switch uvalit da radi sa skeniranjen imena (na petak san ima previse obaveza)
 	removeList(&head);
 	return 1;
 }
@@ -118,3 +122,4 @@ int removeList(position head) {
 	return EXIT_SUCCESS;
 
 }
+
