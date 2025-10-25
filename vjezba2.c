@@ -25,14 +25,37 @@ int findPrev(position, char*);
 int main() {
 	person head = { .name = {0}, .surname = {0}, .birthyear=0, .next=NULL };
 	char ch=0;
+	char inputName=0;
+	char inputSurname=0;
+	char inputBirthyear=0;
 
 	addToFront(&head, "Ivan", "Ivic", 2000);
-	addToFront(&head, "Ana", "Anic", 2001);
-	printf("Which of the following actions do you want to execute:\na - add to the front of the list\nb - printt out the list\nc - add to the end of the list\nd - search by surname in the list\ne - delete element from the list\n}");
+	addToEnd(&head, "Ana", "Anic", 2001);
+	printf("Which of the following actions do you want to execute:\na - add to the front of the list\nb - print out the list\nc - add to the end of the list\nd - search by surname in the list\ne - delete element from the list\n}");
+	scanf("%s", &ch);
+	
+	switch(ch){
+
+		case 'a':
+			printf("add to the front of the list:\nInsert name, surname and birthyear: ");
+			scanf("%s %s %d", &inputName, &inputSurname, &inputBirthyear);
+			addToFront(&head, &inputName, &inputSurname, &inputBirthyear);
+			break;
+		
+		case 'b':
+			printf("\nprint out the list\n");
+			printlist(&head);
+			break;
+		
+		case 'c':
+			printf("add to the end of the list:\nInsert name, surname and birthyear: ");
+			scanf("%s %s %d", &inputName, &inputSurname, &inputBirthyear);
+			addToEnd(&head, &inputName, &inputSurname, &inputBirthyear);
+			break;
+	}
 
 
-
-	//8ipo navecer subota ako ovo citate mislin se zadnje 3 ure kako ovaj switch uvalit da radi sa skeniranjen imena (na petak san ima previse obaveza)
+	//8ipo navecer subota ako ovo citate, mislin se zadnje 3 ure kako ovaj switch uvalit da radi sa skeniranjen imena (na petak san ima previse obaveza)
 	removeList(&head);
 	return 1;
 }
@@ -122,4 +145,5 @@ int removeList(position head) {
 	return EXIT_SUCCESS;
 
 }
+
 
