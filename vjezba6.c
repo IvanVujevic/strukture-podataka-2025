@@ -24,41 +24,57 @@ typedef struct _article {
 
 typedef struct _receipt* PositionR;
 typedef struct _receipt {
-	int year, month, day;
+	char date[11];
 	Article ArticleHead;
 	PositionR next;
 }Receipt;
 
 PositionR createReceipt(char*);
 PositionA createArticle(char*, int, double);
-int printList(PositionR);
+int insertSortRec(PositionR, PositionR);
+int insertSortArt(PositionA, PositionA);
+int printArticles(PositionA);
+int printReceipts(PositionR);
 int freeList(PositionR);
+int getArticleInPeriod(PositionR currentReceipt, char* article, char* startDate, char* endDate, int* income, int* count);
 
 int main() {
 
+	int income = 0, count = 0;
+	char search[MAX] = { 0 };
+	char startDate[20] = { 0 };
+	char endDate[20] = { 0 };
 	Receipt head;
 	head.next = NULL;
+	Receipt date = { 0 };
 	FILE* fp = NULL;
 
 	fp = fopen("racuni.txt", "r");
 	if (fp == NULL) {
 		printf("Error opening main file");
-		return;
+		return FILE_OPEN_ERROR;
 	}
 
 	char line[MAX];
 	while (fgets(line, sizeof(line), fp)) {
 		line[strcspn(line, "\n")] = '\0';
 		PositionR temp = createReceipt(line);
-		insertSortReceipt(head, temp);
+		insertSortRec(&head, temp);
 	}
-	printList(&head);
-	printf("Which article do you want to search?\n");
-	char search[MAX];
-	scanf("%s", search);
+	printReceipts(head.next);
 
+	printf("\nEnter article name: ");
+	if (scanf("%s", search) != 1) return SCANF_ERROR;
+	printf("Enter start date (YYYY-MM-DD): ");
+	if (scanf("%s", startDate) != 1) return SCANF_ERROR;
+	printf("Enter end date (YYYY-MM-DD): ");
+	if (scanf("%s", endDate) != 1) return SCANF_ERROR;
+
+	getArticleInPeriod(head.next, search, startDate, endDate, &income, &count);
+	printf("Income of %d %s articles: %d\n", count, search, income);
 
 	fclose(fp);
+	freeList(&head);
 	return EXIT_SUCCESS;
 }
 
@@ -74,25 +90,21 @@ PositionR createReceipt(char* filePath)
 		printf("Error opening file in receipt");
 		return NULL;
 	}
-	int year, month, day, amount;
-	double price;
+	int amount=0;
+	double price=0.0;
 	char article[50], line[50];
-	fgets(line, sizeof(line), file);
-	if (sscanf(line, "%4d-%2d-%2d", &year, &month, &day) == 3) {
-		newReceipt->year = year;
-		newReceipt->month = month;
-		newReceipt->day = day;
-	}
-	else {
-		printf("Error reading date");
-		return NULL;
-	}
+
+
+	fgets(line, 50, file);
+	line[strcspn(line, "\n")] = 0;
+	strcpy(newReceipt->date, line);
+
 	newReceipt->ArticleHead.next = NULL;
 	newReceipt->next = NULL;
 	while (fgets(line, sizeof(line), file)) {
-		if (sscanf(line, "%s %d %lf", article, &amount, &price) == 3) {
+		if (sscanf(line, "%s, %d, %lf", article, &amount, &price) == 3) {
 			PositionA temp = createArticle(article, amount, price);
-			insertSortArticle(&newReceipt->ArticleHead, temp);
+			insertSortArt(&newReceipt->ArticleHead, temp);
 		}
 		else {
 			printf("Error reading articles");
@@ -120,19 +132,22 @@ PositionA createArticle(char* article, int amount, double price) {
 int insertSortRec(PositionR head, PositionR P)
 {
 	PositionR temp = head;
-	while (temp->next != NULL && !compareDates(temp->next, P))
+	while (temp->next != NULL && strcmp(P->date, temp->next->date) >= 0) {
 		temp = temp->next;
+	}
+
 	P->next = temp->next;
 	temp->next = P;
-
-
+	
 	return EXIT_SUCCESS;
 }
+
+
 
 int insertSortArt(PositionA head, PositionA P)
 {
 	PositionA temp = head;
-	while (temp->next != NULL && !compareStrings(temp->next, P))
+	while (temp->next != NULL && strcmp(P->ArticleName, temp->next->ArticleName) >= 0)
 		temp = temp->next;
 	P->next = temp->next;
 	temp->next = P;
@@ -141,23 +156,51 @@ int insertSortArt(PositionA head, PositionA P)
 	return EXIT_SUCCESS;
 }
 
-int printList(PositionR head)
+
+int getArticleInPeriod(PositionR currentReceipt, char* search, char* startDate, char* endDate, int* income, int* count)
 {
-	PositionR temp = head->next;
-	while (temp != NULL) {
-		printf("Na dan %d.%d.%d. prodano je:\n", temp->day, temp->month, temp->year);
-		PositionA tempArt = temp->ArticleHead.next;
-		while (tempArt != NULL) {
-			printf("%s, %d komada po %.2lf eura\n", tempArt->ArticleName, tempArt->amount, tempArt->price);
-			tempArt = tempArt->next;
+	PositionA currentArticle = NULL;
+
+	while (currentReceipt != NULL && strcmp(currentReceipt->date, startDate) < 0)
+		currentReceipt = currentReceipt->next;
+
+	while (currentReceipt != NULL && strcmp(currentReceipt->date, endDate) <= 0) {
+		currentArticle = currentReceipt->ArticleHead.next;
+		while (currentArticle != NULL) {
+			if (strcmp(currentArticle->ArticleName, search) == 0) {
+				*income += currentArticle->amount * currentArticle->price;
+				*count += currentArticle->amount;
+			}
+			currentArticle = currentArticle->next;
 		}
-		printf("\n");
-		temp = temp->next;
+		currentReceipt = currentReceipt->next;
 	}
+
 	return EXIT_SUCCESS;
 }
 
-int freeList(PositionR head){
+int printArticles(PositionA current)
+{
+	while (current != NULL) {
+		printf("\t%s, %d, %.2lf\n", current->ArticleName, current->amount, current->price);
+		current = current->next;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int printReceipts(PositionR current)
+{
+	while (current != NULL) {
+		printf("Receipt from date %s:\n", current->date);
+		printArticles(current->ArticleHead.next);
+		current = current->next;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int freeList(PositionR head) {
 	PositionR temp = head->next;
 	while (temp != NULL) {
 		PositionA tempArt = temp->ArticleHead.next;
