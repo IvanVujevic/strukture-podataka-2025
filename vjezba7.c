@@ -142,7 +142,7 @@ int pop(stackPosition HeadStackAdr) {
 	return EXIT_SUCCESS;
 }
 
-int printDirectory(dirPosition current, int depth) {
+int printDirectory(dirPosition current, int height) {
 
 	int i = 0;
 	dirPosition currentSub = NULL;
@@ -150,10 +150,10 @@ int printDirectory(dirPosition current, int depth) {
 	if (current->subDirPos != NULL) {
 		currentSub = current->subDirPos;
 		while (currentSub != NULL) {
-			for (i = 0; i < depth; i++)
+			for (i = 0; i < height; i++)
 				printf(" ");
 			printf("%s\n", currentSub->name);
-			printDirectory(currentSub, depth + 1);
+			printDirectory(currentSub, height + 1);
 			currentSub = currentSub->next;
 		}
 	}
@@ -181,4 +181,5 @@ int deleteStack(stackPosition HeadStack) {
 	}
 
 	return EXIT_SUCCESS;
+
 }
