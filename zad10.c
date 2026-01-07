@@ -34,12 +34,16 @@ int deleteCountry(countryPosition C);
 int deleteTown(townPosition root);
 int printCountry(countryPosition C);
 int printTown(townPosition root);
+int menu(countryPosition C);
+countryPosition findCountry(countryPosition C, const char* name);
+int searchTownByPopulation(townPosition root, int minPopulation);
 
 int main() {
 	Country head = { .countryName = {0}, .TownTree=NULL, .next=NULL };
 	readCountryFile(&head, "drzave.txt");
 
 	printCountry(head.next);
+	menu(head.next);
 	deleteCountry(&head);
 	return EXIT_SUCCESS;
 }
@@ -170,6 +174,55 @@ int printTown(townPosition root) {
 	printTown(root->left);
 	printf(" %s (%d)\n", root->townName, root->population);
 	printTown(root->right);
+
+	return EXIT_SUCCESS;
+
+}
+
+countryPosition findCountry(countryPosition C, const char* name) {
+	while (C != NULL) {
+		if (strcmp(C->countryName, name) == 0)
+			return C;
+		C = C->next;
+	}
+	return NULL;
+}
+
+int searchTownByPopulation(townPosition root, int minPopulation) {
+	if (root == NULL)
+		return;
+
+	if (root->population > minPopulation) {
+		searchTownByPopulation(root->left, minPopulation);
+		printf(" %s (%d)\n", root->townName, root->population);
+		searchTownByPopulation(root->right, minPopulation);
+	}
+	else {
+		searchTownByPopulation(root->right, minPopulation);
+	}
+	return EXIT_SUCCESS;
+}
+
+int menu(countryPosition C) {
+	char countryName[MAX_NAME] = { 0 };
+	int minPopulation=0;
+
+	printf("Enter country name: ");
+	scanf("%s", countryName);
+
+	printf("Enter minimum population: ");
+	scanf("%d", &minPopulation);
+
+	countryPosition country = findCountry(C, countryName);
+	if (!country) {
+		printf("Country not found!\n");
+		return;
+	}
+
+	printf("\nTowns in %s with population > %d:\n",
+		country->countryName, minPopulation);
+
+	searchTownByPopulation(country->TownTree, minPopulation);
 
 	return EXIT_SUCCESS;
 }
