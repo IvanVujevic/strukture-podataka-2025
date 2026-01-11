@@ -77,7 +77,7 @@ townPosition readTownFile(const char*filename) {
 		return NULL;
 	}
 
-	while (fscanf(fpp, "%s %d", townName, &population) == 2) {
+	while (fscanf(fpp, "%s, %d", townName, &population) == 2) {
 		root=createTown(root, townName, population);
 	}
 
@@ -226,3 +226,4 @@ int menu(countryPosition C) {
 
 	return EXIT_SUCCESS;
 }
+
